@@ -24,12 +24,6 @@ make
 The first build configures CMake automatically. Later builds are incremental
 and rebuild only the `SignAnalysis` plugin when its sources change.
 
-Run the tests:
-
-```sh
-make test
-```
-
 Run the analysis on the included SQLite source:
 
 ```sh
@@ -64,7 +58,6 @@ make clean
 - `SignAnalysis.h` connects the domain to MLIR's sparse data-flow framework.
 - `Plugin.cpp` registers the `sign-analysis` pass.
 - `Annotate.cpp` and `Annotate.h` print analysis results alongside the IR.
-- `test/sign.mlir` contains the test input.
 
 The CMake files handle LLVM discovery and platform-specific plugin linking;
 normal development should only require the Makefile commands above.

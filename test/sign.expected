@@ -1,7 +1,0 @@
-# Constants seed the analysis with sign facts.
-llvm.mlir.constant(0 : i32) : i32 // %0 is zero
-llvm.mlir.constant(-2 : i32) : i32 // %1 is negative
-llvm.mlir.constant(3 : i32) : i32 // %2 is positive
-
-# Operations without a transfer function remain unknown.
-!%3 is

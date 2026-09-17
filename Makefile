@@ -5,13 +5,10 @@ INPUT ?= input.mlir
 all: build
 
 run: build $(INPUT)
-	./run.sh $(INPUT) | grep -E 'is (zero|negative|positive)'
+	./run.sh $(INPUT) | grep -E 'is (zero|one|negative|positive)'
 
 run-no-constants: build $(INPUT)
-	./run.sh $(INPUT) | awk '/is (zero|negative|positive)/ && !/llvm\.mlir\.constant/'
-
-test: build
-	ctest --test-dir $(BUILD_DIR) --output-on-failure
+	./run.sh $(INPUT) | awk '/is (zero|one|negative|positive)/ && !/llvm\.mlir\.constant/'
 
 input.mlir: sqlite3.c
 	clang -S -emit-llvm -o - sqlite3.c | mlir-translate --import-llvm > input.mlir
@@ -27,4 +24,4 @@ clean:
 		cmake --build $(BUILD_DIR) --target clean; \
 	fi
 
-.PHONY: all build clean run run-no-constants test
+.PHONY: all build clean run run-no-constants

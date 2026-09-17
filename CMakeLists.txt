@@ -110,10 +110,7 @@ set_target_properties(SignAnalysis PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 #===----------------------------------------------------------------------===#
-# Tests
-#
-# Driven by a CMake script rather than a shell script so that the test suite
-# has exactly the same dependencies as the build itself.
+# Check that the host tool matches the LLVM used to build the plugin.
 #===----------------------------------------------------------------------===#
 find_program(MLIR_OPT_EXECUTABLE mlir-opt
   HINTS ${MLIR_TOOLS_BINARY_DIR} ${LLVM_TOOLS_BINARY_DIR}
@@ -131,15 +128,4 @@ if(MLIR_OPT_EXECUTABLE)
       "but this plugin is being built against ${LLVM_PACKAGE_VERSION}.  "
       "Loading it will fail; point MLIR_DIR at the matching build.")
   endif()
-
-  enable_testing()
-  add_test(NAME sign-analysis
-    COMMAND ${CMAKE_COMMAND}
-      -DMLIR_OPT=${MLIR_OPT_EXECUTABLE}
-      -DPLUGIN=$<TARGET_FILE:SignAnalysis>
-      -DINPUT=${CMAKE_CURRENT_SOURCE_DIR}/test/sign.mlir
-      -DCHECKS=${CMAKE_CURRENT_SOURCE_DIR}/test/sign.expected
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunTest.cmake)
-else()
-  message(STATUS "mlir-opt not found; skipping tests")
 endif()

@@ -18,7 +18,8 @@ namespace sign {
 
 namespace {
 
-// Rows and columns are ordered as: bottom, zero, negative, positive, top.
+// Rows and columns are ordered as: bottom, zero, negative, zero-or-negative,
+// one, positive, zero-or-positive, top.
 // Keeping the tables in the same form as the specification makes each
 // transfer function easy to check against it.
 constexpr unsigned tableIndex(Kind kind) {
@@ -29,70 +30,107 @@ constexpr unsigned tableIndex(Kind kind) {
         return 1;
     case Kind::Negative:
         return 2;
-    case Kind::Positive:
+    case Kind::ZeroOrNeg:
         return 3;
-    case Kind::Top:
+    case Kind::One:
         return 4;
+    case Kind::Positive:
+        return 5;
+    case Kind::ZeroOrPos:
+        return 6;
+    case Kind::Top:
+        return 7;
     }
-    return 4;
+    return 7;
 }
 
-using TransferTable = Kind[5][5];
+using TransferTable = Kind[8][8];
+
+constexpr Kind B = Kind::Bottom;
+constexpr Kind Z = Kind::Zero;
+constexpr Kind N = Kind::Negative;
+constexpr Kind ZN = Kind::ZeroOrNeg;
+constexpr Kind O = Kind::One;
+constexpr Kind P = Kind::Positive;
+constexpr Kind ZP = Kind::ZeroOrPos;
+constexpr Kind T = Kind::Top;
 
 constexpr TransferTable addTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Zero, Kind::Negative, Kind::Positive, Kind::Top},
-    {Kind::Bottom, Kind::Negative, Kind::Negative, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Positive, Kind::Top, Kind::Positive, Kind::Top},
-    {Kind::Bottom, Kind::Top, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, Z, N, ZN, O, P, ZP, T},
+    {B, N, N, N, ZN, T, T, T},
+    {B, ZN, N, ZN, T, T, T, T},
+    {B, O, ZN, T, P, P, P, T},
+    {B, P, T, T, P, P, P, T},
+    {B, ZP, T, T, P, P, ZP, T},
+    {B, T, T, T, T, T, T, T},
 };
 
 constexpr TransferTable subTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Zero, Kind::Positive, Kind::Negative, Kind::Top},
-    {Kind::Bottom, Kind::Negative, Kind::Top, Kind::Negative, Kind::Top},
-    {Kind::Bottom, Kind::Positive, Kind::Positive, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Top, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, Z, P, ZP, N, N, ZN, T},
+    {B, N, T, T, N, N, N, T},
+    {B, ZN, T, T, N, N, ZN, T},
+    {B, O, P, P, Z, ZN, T, T},
+    {B, P, P, P, ZP, T, T, T},
+    {B, ZP, P, ZP, T, T, T, T},
+    {B, T, T, T, T, T, T, T},
 };
 
 constexpr TransferTable mulTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Zero, Kind::Zero, Kind::Zero, Kind::Zero},
-    {Kind::Bottom, Kind::Zero, Kind::Positive, Kind::Negative, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Negative, Kind::Positive, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, Z, Z, Z, Z, Z, Z, Z},
+    {B, Z, P, ZP, N, N, ZN, T},
+    {B, Z, ZP, ZP, ZN, ZN, ZN, T},
+    {B, Z, N, ZN, O, P, ZP, T},
+    {B, Z, N, ZN, P, P, ZP, T},
+    {B, Z, ZN, ZN, ZP, ZP, ZP, T},
+    {B, Z, T, T, T, T, T, T},
 };
 
 constexpr TransferTable divTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom}, {Kind::Bottom, Kind::Bottom, Kind::Zero, Kind::Zero, Kind::Zero},
-    {Kind::Bottom, Kind::Bottom, Kind::Top, Kind::Top, Kind::Top},          {Kind::Bottom, Kind::Bottom, Kind::Top, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Bottom, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, B, Z, Z, Z, Z, Z, Z},
+    {B, B, ZP, ZP, N, ZN, ZN, T},
+    {B, B, ZP, ZP, ZN, ZN, ZN, T},
+    {B, B, ZN, ZN, O, ZP, ZP, T},
+    {B, B, ZN, ZN, P, ZP, ZP, T},
+    {B, B, ZN, ZN, ZP, ZP, ZP, T},
+    {B, B, T, T, T, T, T, T},
 };
 
 constexpr TransferTable greaterThanTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Zero, Kind::Positive, Kind::Zero, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Zero, Kind::Top},
-    {Kind::Bottom, Kind::Positive, Kind::Positive, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Top, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, Z, O, ZP, Z, Z, Z, ZP},
+    {B, Z, ZP, ZP, Z, Z, Z, ZP},
+    {B, Z, ZP, ZP, Z, Z, Z, ZP},
+    {B, O, O, O, Z, Z, ZP, ZP},
+    {B, O, O, O, ZP, ZP, ZP, ZP},
+    {B, ZP, O, ZP, ZP, ZP, ZP, ZP},
+    {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable equalTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Positive, Kind::Zero, Kind::Zero, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Zero, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Zero, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Top, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, O, Z, ZP, Z, Z, ZP, ZP},
+    {B, Z, ZP, ZP, Z, Z, Z, ZP},
+    {B, ZP, ZP, ZP, Z, Z, ZP, ZP},
+    {B, Z, Z, Z, O, ZP, ZP, ZP},
+    {B, Z, Z, Z, ZP, ZP, ZP, ZP},
+    {B, ZP, Z, ZP, ZP, ZP, ZP, ZP},
+    {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable andTable = {
-    {Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom, Kind::Bottom},
-    {Kind::Bottom, Kind::Zero, Kind::Zero, Kind::Zero, Kind::Zero},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Top, Kind::Top},
-    {Kind::Bottom, Kind::Zero, Kind::Top, Kind::Top, Kind::Top},
+    {B, B, B, B, B, B, B, B},
+    {B, Z, Z, Z, Z, Z, Z, Z},
+    {B, Z, N, ZN, ZP, ZP, ZP, T},
+    {B, Z, ZN, ZN, ZP, ZP, ZP, T},
+    {B, Z, ZP, ZP, O, ZP, ZP, ZP},
+    {B, Z, ZP, ZP, ZP, ZP, ZP, ZP},
+    {B, Z, ZP, ZP, ZP, ZP, ZP, ZP},
+    {B, Z, T, T, ZP, ZP, ZP, T},
 };
-// Rows and columns are ordered as: bottom, zero, negative, positive, top.
 
 SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[tableIndex(lhs.kind)][tableIndex(rhs.kind)]; }
 
@@ -114,7 +152,7 @@ LogicalResult SignAnalysis::visitOperation(Operation* op, ArrayRef<const SignLat
         return unknown();
     SignLattice* result = results[0];
 
-    // Constants seed the analysis with zero, negative, or positive.
+    // Constants seed the analysis with zero, one, negative, or positive.
     // This is the only rule that does not consult its operands, and without some
     // rule of this kind the analysis would have no facts to propagate at all.
     IntegerAttr value;
@@ -122,11 +160,9 @@ LogicalResult SignAnalysis::visitOperation(Operation* op, ArrayRef<const SignLat
         SignState state;
         if (value.getValue().isZero()) {
             state = Kind::Zero;
-        }
-        // else if (value.getValue().isOne()) {
-        //     state = Kind::One;
-        // }
-        else if (value.getValue().isStrictlyPositive()) {
+        } else if (value.getValue().isOne()) {
+            state = Kind::One;
+        } else if (value.getValue().isStrictlyPositive()) {
             state = Kind::Positive;
         } else if (value.getValue().isNegative()) {
             state = Kind::Negative;

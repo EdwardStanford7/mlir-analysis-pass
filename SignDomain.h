@@ -1,11 +1,15 @@
 //===- SignDomain.h - The abstract domain ---------------------------------===//
 //
-// A five-point lattice recording sign information about an integer.
+// An eight-point lattice recording sign information about an integer.
 //
-//                           Top
-//                      ╱     │     ╲
-//              Negative    Zero    Positive
-//                      ╲     │     ╱
+//                              Top
+//                         ╱           ╲
+//                ZeroOrNeg           ZeroOrPos
+//                  ╱     ╲           ╱      ╲
+//          Negative       Zero          Positive
+//                  ╲       │                   /
+//                   ╲      │            One
+//                    ╲     │            ╱
 //                         Bottom
 //
 // This is the file to replace first when building a different analysis.  MLIR's
@@ -26,18 +30,24 @@
 
 namespace sign {
 
-enum class Kind { Bottom, Negative, Zero, Positive, Top };
+enum class Kind { Bottom, Zero, Negative, ZeroOrNeg, One, Positive, ZeroOrPos, Top };
 
 inline const char* name(Kind kind) {
     switch (kind) {
     case Kind::Bottom:
         return "bottom";
-    case Kind::Negative:
-        return "negative";
     case Kind::Zero:
         return "zero";
+    case Kind::Negative:
+        return "negative";
+    case Kind::ZeroOrNeg:
+        return "zero-or-negative";
+    case Kind::One:
+        return "one";
     case Kind::Positive:
         return "positive";
+    case Kind::ZeroOrPos:
+        return "zero-or-positive";
     case Kind::Top:
         return "top";
     }
@@ -55,16 +65,39 @@ struct SignState {
 
     bool isBottom() const { return kind == Kind::Bottom; }
 
-    /// Least upper bound.  Two disagreeing facts lose all information.
+    /// Least upper bound in the sign lattice.
     static SignState join(const SignState& lhs, const SignState& rhs) {
-        if (lhs.kind == Kind::Bottom) {
-            return rhs;
-        }
-        if (rhs.kind == Kind::Bottom) {
-            return lhs;
-        }
-        if (lhs.kind == rhs.kind) {
-            return lhs;
+        // Bits represent negative values, zero, one, and positive values other
+        // than one. Each lattice element is the smallest available abstraction
+        // containing its bits.
+        auto mask = [](Kind kind) -> unsigned {
+            switch (kind) {
+            case Kind::Bottom:
+                return 0b0000;
+            case Kind::Negative:
+                return 0b0001;
+            case Kind::Zero:
+                return 0b0010;
+            case Kind::One:
+                return 0b0100;
+            case Kind::Positive:
+                return 0b1100;
+            case Kind::ZeroOrNeg:
+                return 0b0011;
+            case Kind::ZeroOrPos:
+                return 0b1110;
+            case Kind::Top:
+                return 0b1111;
+            }
+            return 0b1111;
+        };
+
+        unsigned joined = mask(lhs.kind) | mask(rhs.kind);
+        for (Kind candidate : {Kind::Bottom, Kind::Negative, Kind::Zero, Kind::One, Kind::Positive, Kind::ZeroOrNeg, Kind::ZeroOrPos, Kind::Top}) {
+            unsigned candidateMask = mask(candidate);
+            if ((candidateMask & joined) == joined) {
+                return candidate;
+            }
         }
         return top();
     }
