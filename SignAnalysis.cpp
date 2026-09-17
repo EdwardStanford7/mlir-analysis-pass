@@ -56,80 +56,38 @@ constexpr Kind ZP = Kind::ZeroOrPos;
 constexpr Kind T = Kind::Top;
 
 constexpr TransferTable addTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, Z, N, ZN, O, P, ZP, T},
-    {B, N, N, N, ZN, T, T, T},
-    {B, ZN, N, ZN, T, T, T, T},
-    {B, O, ZN, T, P, P, P, T},
-    {B, P, T, T, P, P, P, T},
-    {B, ZP, T, T, P, P, ZP, T},
-    {B, T, T, T, T, T, T, T},
+    {B, B, B, B, B, B, B, B},  {B, Z, N, ZN, O, P, ZP, T}, {B, N, N, N, ZN, T, T, T},  {B, ZN, N, ZN, T, T, T, T},
+    {B, O, ZN, T, P, P, P, T}, {B, P, T, T, P, P, P, T},   {B, ZP, T, T, P, P, ZP, T}, {B, T, T, T, T, T, T, T},
 };
 
 constexpr TransferTable subTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, Z, P, ZP, N, N, ZN, T},
-    {B, N, T, T, N, N, N, T},
-    {B, ZN, T, T, N, N, ZN, T},
-    {B, O, P, P, Z, ZN, T, T},
-    {B, P, P, P, ZP, T, T, T},
-    {B, ZP, P, ZP, T, T, T, T},
-    {B, T, T, T, T, T, T, T},
+    {B, B, B, B, B, B, B, B},  {B, Z, P, ZP, N, N, ZN, T}, {B, N, T, T, N, N, N, T},   {B, ZN, T, T, N, N, ZN, T},
+    {B, O, P, P, Z, ZN, T, T}, {B, P, P, P, ZP, T, T, T},  {B, ZP, P, ZP, T, T, T, T}, {B, T, T, T, T, T, T, T},
 };
 
 constexpr TransferTable mulTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, Z, Z, Z, Z, Z, Z, Z},
-    {B, Z, P, ZP, N, N, ZN, T},
-    {B, Z, ZP, ZP, ZN, ZN, ZN, T},
-    {B, Z, N, ZN, O, P, ZP, T},
-    {B, Z, N, ZN, P, P, ZP, T},
-    {B, Z, ZN, ZN, ZP, ZP, ZP, T},
-    {B, Z, T, T, T, T, T, T},
+    {B, B, B, B, B, B, B, B},   {B, Z, Z, Z, Z, Z, Z, Z},   {B, Z, P, ZP, N, N, ZN, T},    {B, Z, ZP, ZP, ZN, ZN, ZN, T},
+    {B, Z, N, ZN, O, P, ZP, T}, {B, Z, N, ZN, P, P, ZP, T}, {B, Z, ZN, ZN, ZP, ZP, ZP, T}, {B, Z, T, T, T, T, T, T},
 };
 
 constexpr TransferTable divTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, B, Z, Z, Z, Z, Z, Z},
-    {B, B, ZP, ZP, N, ZN, ZN, T},
-    {B, B, ZP, ZP, ZN, ZN, ZN, T},
-    {B, B, ZN, ZN, O, ZP, ZP, T},
-    {B, B, ZN, ZN, P, ZP, ZP, T},
-    {B, B, ZN, ZN, ZP, ZP, ZP, T},
-    {B, B, T, T, T, T, T, T},
+    {B, B, B, B, B, B, B, B},     {B, B, Z, Z, Z, Z, Z, Z},     {B, B, ZP, ZP, N, ZN, ZN, T},  {B, B, ZP, ZP, ZN, ZN, ZN, T},
+    {B, B, ZN, ZN, O, ZP, ZP, T}, {B, B, ZN, ZN, P, ZP, ZP, T}, {B, B, ZN, ZN, ZP, ZP, ZP, T}, {B, B, T, T, T, T, T, T},
 };
 
 constexpr TransferTable greaterThanTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, Z, O, ZP, Z, Z, Z, ZP},
-    {B, Z, ZP, ZP, Z, Z, Z, ZP},
-    {B, Z, ZP, ZP, Z, Z, Z, ZP},
-    {B, O, O, O, Z, Z, ZP, ZP},
-    {B, O, O, O, ZP, ZP, ZP, ZP},
-    {B, ZP, O, ZP, ZP, ZP, ZP, ZP},
-    {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    {B, B, B, B, B, B, B, B},   {B, Z, O, ZP, Z, Z, Z, ZP},   {B, Z, ZP, ZP, Z, Z, Z, ZP},    {B, Z, ZP, ZP, Z, Z, Z, ZP},
+    {B, O, O, O, Z, Z, ZP, ZP}, {B, O, O, O, ZP, ZP, ZP, ZP}, {B, ZP, O, ZP, ZP, ZP, ZP, ZP}, {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable equalTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, O, Z, ZP, Z, Z, ZP, ZP},
-    {B, Z, ZP, ZP, Z, Z, Z, ZP},
-    {B, ZP, ZP, ZP, Z, Z, ZP, ZP},
-    {B, Z, Z, Z, O, ZP, ZP, ZP},
-    {B, Z, Z, Z, ZP, ZP, ZP, ZP},
-    {B, ZP, Z, ZP, ZP, ZP, ZP, ZP},
-    {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    {B, B, B, B, B, B, B, B},    {B, O, Z, ZP, Z, Z, ZP, ZP},  {B, Z, ZP, ZP, Z, Z, Z, ZP},    {B, ZP, ZP, ZP, Z, Z, ZP, ZP},
+    {B, Z, Z, Z, O, ZP, ZP, ZP}, {B, Z, Z, Z, ZP, ZP, ZP, ZP}, {B, ZP, Z, ZP, ZP, ZP, ZP, ZP}, {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable andTable = {
-    {B, B, B, B, B, B, B, B},
-    {B, Z, Z, Z, Z, Z, Z, Z},
-    {B, Z, N, ZN, ZP, ZP, ZP, T},
-    {B, Z, ZN, ZN, ZP, ZP, ZP, T},
-    {B, Z, ZP, ZP, O, ZP, ZP, ZP},
-    {B, Z, ZP, ZP, ZP, ZP, ZP, ZP},
-    {B, Z, ZP, ZP, ZP, ZP, ZP, ZP},
-    {B, Z, T, T, ZP, ZP, ZP, T},
+    {B, B, B, B, B, B, B, B},      {B, Z, Z, Z, Z, Z, Z, Z},       {B, Z, N, ZN, ZP, ZP, ZP, T},   {B, Z, ZN, ZN, ZP, ZP, ZP, T},
+    {B, Z, ZP, ZP, O, ZP, ZP, ZP}, {B, Z, ZP, ZP, ZP, ZP, ZP, ZP}, {B, Z, ZP, ZP, ZP, ZP, ZP, ZP}, {B, Z, T, T, ZP, ZP, ZP, T},
 };
 
 SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[tableIndex(lhs.kind)][tableIndex(rhs.kind)]; }
