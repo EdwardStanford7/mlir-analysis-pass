@@ -36,6 +36,12 @@ Run the analysis on the included SQLite source:
 make run
 ```
 
+To hide facts produced directly by MLIR constant operations:
+
+```sh
+make run-no-constants
+```
+
 To analyze another LLVM-dialect MLIR file:
 
 ```sh

@@ -7,6 +7,9 @@ all: build
 run: build $(INPUT)
 	./run.sh $(INPUT) | grep -E 'is (zero|negative|positive)'
 
+run-no-constants: build $(INPUT)
+	./run.sh $(INPUT) | awk '/is (zero|negative|positive)/ && !/llvm\.mlir\.constant/'
+
 test: build
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
 
@@ -24,4 +27,4 @@ clean:
 		cmake --build $(BUILD_DIR) --target clean; \
 	fi
 
-.PHONY: all build clean run test
+.PHONY: all build clean run run-no-constants test
