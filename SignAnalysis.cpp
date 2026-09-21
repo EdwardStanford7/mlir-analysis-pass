@@ -18,35 +18,11 @@ namespace sign {
 
 namespace {
 
-// Rows and columns are ordered as: bottom, zero, negative, zero-or-negative,
-// one, positive, zero-or-positive, top.
 // Keeping the tables in the same form as the specification makes each
 // transfer function easy to check against it.
-constexpr unsigned tableIndex(Kind kind) {
-    switch (kind) {
-    case Kind::Bottom:
-        return 0;
-    case Kind::Zero:
-        return 1;
-    case Kind::Negative:
-        return 2;
-    case Kind::ZeroOrNeg:
-        return 3;
-    case Kind::One:
-        return 4;
-    case Kind::Positive:
-        return 5;
-    case Kind::ZeroOrPos:
-        return 6;
-    case Kind::Top:
-        return 7;
-    }
-    return 7;
-}
+using TransferTable = Kind[kKindCount][kKindCount];
 
-using TransferTable = Kind[8][8];
-
-SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[tableIndex(lhs.kind)][tableIndex(rhs.kind)]; }
+SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[kindIndex(lhs.kind)][kindIndex(rhs.kind)]; }
 
 constexpr Kind Bo = Kind::Bottom;
 constexpr Kind Ze = Kind::Zero;
