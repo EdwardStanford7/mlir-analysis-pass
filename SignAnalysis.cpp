@@ -46,51 +46,100 @@ constexpr unsigned tableIndex(Kind kind) {
 
 using TransferTable = Kind[8][8];
 
-constexpr Kind B = Kind::Bottom;
-constexpr Kind Z = Kind::Zero;
-constexpr Kind N = Kind::Negative;
+SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[tableIndex(lhs.kind)][tableIndex(rhs.kind)]; }
+
+constexpr Kind Bo = Kind::Bottom;
+constexpr Kind Ze = Kind::Zero;
+constexpr Kind Ne = Kind::Negative;
 constexpr Kind ZN = Kind::ZeroOrNeg;
-constexpr Kind O = Kind::One;
-constexpr Kind P = Kind::Positive;
+constexpr Kind On = Kind::One;
+constexpr Kind Po = Kind::Positive;
 constexpr Kind ZP = Kind::ZeroOrPos;
-constexpr Kind T = Kind::Top;
+constexpr Kind To = Kind::Top;
 
 constexpr TransferTable addTable = {
-    {B, B, B, B, B, B, B, B},  {B, Z, N, ZN, O, P, ZP, T}, {B, N, N, N, ZN, T, T, T},  {B, ZN, N, ZN, T, T, T, T},
-    {B, O, ZN, T, P, P, P, T}, {B, P, T, T, P, P, P, T},   {B, ZP, T, T, P, P, ZP, T}, {B, T, T, T, T, T, T, T},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ne, ZN, On, Po, ZP, To},
+    /* Ne */ {Bo, Ne, Ne, Ne, ZN, To, To, To},
+    /* ZN */ {Bo, ZN, Ne, ZN, To, To, To, To},
+    /* On */ {Bo, On, ZN, To, Po, Po, Po, To},
+    /* Po */ {Bo, Po, To, To, Po, Po, Po, To},
+    /* ZP */ {Bo, ZP, To, To, Po, Po, ZP, To},
+    /* To */ {Bo, To, To, To, To, To, To, To},
 };
 
 constexpr TransferTable subTable = {
-    {B, B, B, B, B, B, B, B},  {B, Z, P, ZP, N, N, ZN, T}, {B, N, T, T, N, N, N, T},   {B, ZN, T, T, N, N, ZN, T},
-    {B, O, P, P, Z, ZN, T, T}, {B, P, P, P, ZP, T, T, T},  {B, ZP, P, ZP, T, T, T, T}, {B, T, T, T, T, T, T, T},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Po, ZP, Ne, Ne, ZN, To},
+    /* Ne */ {Bo, Ne, To, To, Ne, Ne, Ne, To},
+    /* ZN */ {Bo, ZN, To, To, Ne, Ne, ZN, To},
+    /* On */ {Bo, On, Po, Po, Ze, ZN, To, To},
+    /* Po */ {Bo, Po, Po, Po, ZP, To, To, To},
+    /* ZP */ {Bo, ZP, Po, ZP, To, To, To, To},
+    /* To */ {Bo, To, To, To, To, To, To, To},
 };
 
-constexpr TransferTable mulTable = {
-    {B, B, B, B, B, B, B, B},   {B, Z, Z, Z, Z, Z, Z, Z},   {B, Z, P, ZP, N, N, ZN, T},    {B, Z, ZP, ZP, ZN, ZN, ZN, T},
-    {B, Z, N, ZN, O, P, ZP, T}, {B, Z, N, ZN, P, P, ZP, T}, {B, Z, ZN, ZN, ZP, ZP, ZP, T}, {B, Z, T, T, T, T, T, T},
+constexpr TransferTable multTable = {
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Ze, Po, ZP, Ne, Ne, ZN, To},
+    /* ZN */ {Bo, Ze, ZP, ZP, ZN, ZN, ZN, To},
+    /* On */ {Bo, Ze, Ne, ZN, On, Po, ZP, To},
+    /* Po */ {Bo, Ze, Ne, ZN, Po, Po, ZP, To},
+    /* ZP */ {Bo, Ze, ZN, ZN, ZP, ZP, ZP, To},
+    /* To */ {Bo, Ze, To, To, To, To, To, To},
 };
 
 constexpr TransferTable divTable = {
-    {B, B, B, B, B, B, B, B},     {B, B, Z, Z, Z, Z, Z, Z},     {B, B, ZP, ZP, N, ZN, ZN, T},  {B, B, ZP, ZP, ZN, ZN, ZN, T},
-    {B, B, ZN, ZN, O, ZP, ZP, T}, {B, B, ZN, ZN, P, ZP, ZP, T}, {B, B, ZN, ZN, ZP, ZP, ZP, T}, {B, B, T, T, T, T, T, T},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Bo, Ze, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Bo, ZP, ZP, Ne, ZN, ZN, To},
+    /* ZN */ {Bo, Bo, ZP, ZP, ZN, ZN, ZN, To},
+    /* On */ {Bo, Bo, ZN, ZN, On, ZP, ZP, To},
+    /* Po */ {Bo, Bo, ZN, ZN, Po, ZP, ZP, To},
+    /* ZP */ {Bo, Bo, ZN, ZN, ZP, ZP, ZP, To},
+    /* To */ {Bo, Bo, To, To, To, To, To, To},
 };
 
 constexpr TransferTable greaterThanTable = {
-    {B, B, B, B, B, B, B, B},   {B, Z, O, ZP, Z, Z, Z, ZP},   {B, Z, ZP, ZP, Z, Z, Z, ZP},    {B, Z, ZP, ZP, Z, Z, Z, ZP},
-    {B, O, O, O, Z, Z, ZP, ZP}, {B, O, O, O, ZP, ZP, ZP, ZP}, {B, ZP, O, ZP, ZP, ZP, ZP, ZP}, {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, On, ZP, Ze, Ze, Ze, ZP},
+    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
+    /* ZN */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
+    /* On */ {Bo, On, On, On, Ze, Ze, ZP, ZP},
+    /* Po */ {Bo, On, On, On, ZP, ZP, ZP, ZP},
+    /* ZP */ {Bo, ZP, On, ZP, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable equalTable = {
-    {B, B, B, B, B, B, B, B},    {B, O, Z, ZP, Z, Z, ZP, ZP},  {B, Z, ZP, ZP, Z, Z, Z, ZP},    {B, ZP, ZP, ZP, Z, Z, ZP, ZP},
-    {B, Z, Z, Z, O, ZP, ZP, ZP}, {B, Z, Z, Z, ZP, ZP, ZP, ZP}, {B, ZP, Z, ZP, ZP, ZP, ZP, ZP}, {B, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, On, Ze, ZP, Ze, Ze, ZP, ZP},
+    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
+    /* ZN */ {Bo, ZP, ZP, ZP, Ze, Ze, ZP, ZP},
+    /* On */ {Bo, Ze, Ze, Ze, On, ZP, ZP, ZP},
+    /* Po */ {Bo, Ze, Ze, Ze, ZP, ZP, ZP, ZP},
+    /* ZP */ {Bo, ZP, Ze, ZP, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable andTable = {
-    {B, B, B, B, B, B, B, B},      {B, Z, Z, Z, Z, Z, Z, Z},       {B, Z, N, ZN, ZP, ZP, ZP, T},   {B, Z, ZN, ZN, ZP, ZP, ZP, T},
-    {B, Z, ZP, ZP, O, ZP, ZP, ZP}, {B, Z, ZP, ZP, ZP, ZP, ZP, ZP}, {B, Z, ZP, ZP, ZP, ZP, ZP, ZP}, {B, Z, T, T, ZP, ZP, ZP, T},
+    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Ze, Ne, ZN, ZP, ZP, ZP, To},
+    /* ZN */ {Bo, Ze, ZN, ZN, ZP, ZP, ZP, To},
+    /* On */ {Bo, Ze, ZP, ZP, On, ZP, ZP, ZP},
+    /* Po */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP, ZP},
+    /* ZP */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, Ze, To, To, ZP, ZP, ZP, To},
 };
-
-SignState evaluate(const TransferTable& table, SignState lhs, SignState rhs) { return table[tableIndex(lhs.kind)][tableIndex(rhs.kind)]; }
 
 } // namespace
 
@@ -135,34 +184,29 @@ LogicalResult SignAnalysis::visitOperation(Operation* op, ArrayRef<const SignLat
 
     SignState lhs = operands[0]->getValue();
     SignState rhs = operands[1]->getValue();
-    auto transfer = [&](const TransferTable& table) {
-        propagateIfChanged(result, result->join(evaluate(table, lhs, rhs)));
-        return success();
-    };
+    const TransferTable* table = nullptr;
 
-    if (isa<LLVM::AddOp>(op)) {
-        return transfer(addTable);
-    }
-    if (isa<LLVM::SubOp>(op)) {
-        return transfer(subTable);
-    }
-    if (isa<LLVM::MulOp>(op)) {
-        return transfer(mulTable);
-    }
-    if (isa<LLVM::SDivOp>(op)) {
-        return transfer(divTable);
-    }
-    if (isa<LLVM::AndOp>(op)) {
-        return transfer(andTable);
-    }
+    if (isa<LLVM::AddOp>(op))
+        table = &addTable;
+    if (isa<LLVM::SubOp>(op))
+        table = &subTable;
+    if (isa<LLVM::MulOp>(op))
+        table = &multTable;
+    if (isa<LLVM::SDivOp>(op))
+        table = &divTable;
+    if (isa<LLVM::AndOp>(op))
+        table = &andTable;
 
     if (auto compare = dyn_cast<LLVM::ICmpOp>(op)) {
-        if (compare.getPredicate() == LLVM::ICmpPredicate::sgt) {
-            return transfer(greaterThanTable);
-        }
-        if (compare.getPredicate() == LLVM::ICmpPredicate::eq) {
-            return transfer(equalTable);
-        }
+        if (compare.getPredicate() == LLVM::ICmpPredicate::sgt)
+            table = &greaterThanTable;
+        else if (compare.getPredicate() == LLVM::ICmpPredicate::eq)
+            table = &equalTable;
+    }
+
+    if (table != nullptr) {
+        propagateIfChanged(result, result->join(evaluate(*table, lhs, rhs)));
+        return success();
     }
 
     return unknown();
