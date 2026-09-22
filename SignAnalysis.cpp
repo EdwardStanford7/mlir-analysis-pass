@@ -28,93 +28,85 @@ constexpr Kind Bo = Kind::Bottom;
 constexpr Kind Ze = Kind::Zero;
 constexpr Kind Ne = Kind::Negative;
 constexpr Kind ZN = Kind::ZeroOrNeg;
-constexpr Kind On = Kind::One;
 constexpr Kind Po = Kind::Positive;
 constexpr Kind ZP = Kind::ZeroOrPos;
 constexpr Kind To = Kind::Top;
 
 constexpr TransferTable addTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, Ne, ZN, On, Po, ZP, To},
-    /* Ne */ {Bo, Ne, Ne, Ne, ZN, To, To, To},
-    /* ZN */ {Bo, ZN, Ne, ZN, To, To, To, To},
-    /* On */ {Bo, On, ZN, To, Po, Po, Po, To},
-    /* Po */ {Bo, Po, To, To, Po, Po, Po, To},
-    /* ZP */ {Bo, ZP, To, To, Po, Po, ZP, To},
-    /* To */ {Bo, To, To, To, To, To, To, To},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ne, ZN, Po, ZP, To},
+    /* Ne */ {Bo, Ne, Ne, Ne, To, To, To},
+    /* ZN */ {Bo, ZN, Ne, ZN, To, To, To},
+    /* Po */ {Bo, Po, To, To, Po, Po, To},
+    /* ZP */ {Bo, ZP, To, To, Po, ZP, To},
+    /* To */ {Bo, To, To, To, To, To, To},
 };
 
 constexpr TransferTable subTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, Po, ZP, Ne, Ne, ZN, To},
-    /* Ne */ {Bo, Ne, To, To, Ne, Ne, Ne, To},
-    /* ZN */ {Bo, ZN, To, To, Ne, Ne, ZN, To},
-    /* On */ {Bo, On, Po, Po, Ze, ZN, To, To},
-    /* Po */ {Bo, Po, Po, Po, ZP, To, To, To},
-    /* ZP */ {Bo, ZP, Po, ZP, To, To, To, To},
-    /* To */ {Bo, To, To, To, To, To, To, To},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Po, ZP, Ne, ZN, To},
+    /* Ne */ {Bo, Ne, To, To, Ne, Ne, To},
+    /* ZN */ {Bo, ZN, To, To, Ne, ZN, To},
+    /* Po */ {Bo, Po, Po, Po, To, To, To},
+    /* ZP */ {Bo, ZP, Po, ZP, To, To, To},
+    /* To */ {Bo, To, To, To, To, To, To},
 };
 
 constexpr TransferTable multTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze, Ze},
-    /* Ne */ {Bo, Ze, Po, ZP, Ne, Ne, ZN, To},
-    /* ZN */ {Bo, Ze, ZP, ZP, ZN, ZN, ZN, To},
-    /* On */ {Bo, Ze, Ne, ZN, On, Po, ZP, To},
-    /* Po */ {Bo, Ze, Ne, ZN, Po, Po, ZP, To},
-    /* ZP */ {Bo, Ze, ZN, ZN, ZP, ZP, ZP, To},
-    /* To */ {Bo, Ze, To, To, To, To, To, To},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Ze, Po, ZP, Ne, ZN, To},
+    /* ZN */ {Bo, Ze, ZP, ZP, ZN, ZN, To},
+    /* Po */ {Bo, Ze, Ne, ZN, Po, ZP, To},
+    /* ZP */ {Bo, Ze, ZN, ZN, ZP, ZP, To},
+    /* To */ {Bo, Ze, To, To, To, To, To},
 };
 
 constexpr TransferTable divTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Bo, Ze, Ze, Ze, Ze, Ze, Ze},
-    /* Ne */ {Bo, Bo, ZP, ZP, Ne, ZN, ZN, To},
-    /* ZN */ {Bo, Bo, ZP, ZP, ZN, ZN, ZN, To},
-    /* On */ {Bo, Bo, ZN, ZN, On, ZP, ZP, To},
-    /* Po */ {Bo, Bo, ZN, ZN, Po, ZP, ZP, To},
-    /* ZP */ {Bo, Bo, ZN, ZN, ZP, ZP, ZP, To},
-    /* To */ {Bo, Bo, To, To, To, To, To, To},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Bo, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Bo, ZP, ZP, ZN, ZN, To},
+    /* ZN */ {Bo, Bo, ZP, ZP, ZN, ZN, To},
+    /* Po */ {Bo, Bo, ZN, ZN, ZP, ZP, To},
+    /* ZP */ {Bo, Bo, ZN, ZN, ZP, ZP, To},
+    /* To */ {Bo, Bo, To, To, To, To, To},
 };
 
 constexpr TransferTable greaterThanTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, On, ZP, Ze, Ze, Ze, ZP},
-    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
-    /* ZN */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
-    /* On */ {Bo, On, On, On, Ze, Ze, ZP, ZP},
-    /* Po */ {Bo, On, On, On, ZP, ZP, ZP, ZP},
-    /* ZP */ {Bo, ZP, On, ZP, ZP, ZP, ZP, ZP},
-    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Po, ZP, Ze, Ze, ZP},
+    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, ZP},
+    /* ZN */ {Bo, Ze, ZP, ZP, Ze, Ze, ZP},
+    /* Po */ {Bo, Po, Po, Po, ZP, ZP, ZP},
+    /* ZP */ {Bo, ZP, Po, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable equalTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, On, Ze, ZP, Ze, Ze, ZP, ZP},
-    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, Ze, ZP},
-    /* ZN */ {Bo, ZP, ZP, ZP, Ze, Ze, ZP, ZP},
-    /* On */ {Bo, Ze, Ze, Ze, On, ZP, ZP, ZP},
-    /* Po */ {Bo, Ze, Ze, Ze, ZP, ZP, ZP, ZP},
-    /* ZP */ {Bo, ZP, Ze, ZP, ZP, ZP, ZP, ZP},
-    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP, ZP},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Po, Ze, ZP, Ze, ZP, ZP},
+    /* Ne */ {Bo, Ze, ZP, ZP, Ze, Ze, ZP},
+    /* ZN */ {Bo, ZP, ZP, ZP, Ze, ZP, ZP},
+    /* Po */ {Bo, Ze, Ze, Ze, ZP, ZP, ZP},
+    /* ZP */ {Bo, ZP, Ze, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, ZP, ZP, ZP, ZP, ZP, ZP},
 };
 
 constexpr TransferTable andTable = {
-    //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze, Ze},
-    /* Ne */ {Bo, Ze, Ne, ZN, ZP, ZP, ZP, To},
-    /* ZN */ {Bo, Ze, ZN, ZN, ZP, ZP, ZP, To},
-    /* On */ {Bo, Ze, ZP, ZP, On, ZP, ZP, ZP},
-    /* Po */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP, ZP},
-    /* ZP */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP, ZP},
-    /* To */ {Bo, Ze, To, To, ZP, ZP, ZP, To},
+    //        Bo  Ze  Ne  ZN  Po  ZP  To
+    /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
+    /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze},
+    /* Ne */ {Bo, Ze, Ne, ZN, ZP, ZP, To},
+    /* ZN */ {Bo, Ze, ZN, ZN, ZP, ZP, To},
+    /* Po */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP},
+    /* ZP */ {Bo, Ze, ZP, ZP, ZP, ZP, ZP},
+    /* To */ {Bo, Ze, To, To, ZP, ZP, To},
 };
 
 } // namespace
@@ -143,8 +135,6 @@ LogicalResult SignAnalysis::visitOperation(Operation* op, ArrayRef<const SignLat
         SignState state;
         if (value.getValue().isZero()) {
             state = Kind::Zero;
-        } else if (value.getValue().isOne()) {
-            state = Kind::One;
         } else if (value.getValue().isStrictlyPositive()) {
             state = Kind::Positive;
         } else if (value.getValue().isNegative()) {

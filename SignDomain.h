@@ -1,19 +1,14 @@
 //===- SignDomain.h - The abstract domain ---------------------------------===//
 //
-// An eight-point lattice recording sign information about an integer.
+// A seven-point lattice recording sign information about an integer.
 //
-//                              Top
-//                         ╱           ╲
-//                ZeroOrNeg           ZeroOrPos
-//                  ╱     ╲           ╱      ╲
-//          Negative       Zero          Positive
-//                  ╲       │                   /
-//                   ╲      │            One
-//                    ╲     │            ╱
-//                         Bottom
-//
-// This is the file to replace first when building a different analysis.  MLIR's
-// dataflow framework asks only three things of a lattice value:
+//                          Top
+//                        ╱     ╲
+//                 ZeroOrNeg   ZeroOrPos
+//                   |    ╲    ╱    |
+//               Negative  Zero  Positive
+//                       ╲   │   /
+//                        Bottom
 //
 //   * a default constructor, which must produce the bottom element, because the
 //     solver starts every value at bottom and raises it as facts arrive;
@@ -30,12 +25,10 @@
 
 namespace sign {
 
-enum class Kind { Bottom, Zero, Negative, ZeroOrNeg, One, Positive, ZeroOrPos, Top };
+enum class Kind { Bottom, Zero, Negative, ZeroOrNeg, /* One,*/ Positive, ZeroOrPos, Top };
 
-inline constexpr unsigned kKindCount = 8;
+inline constexpr unsigned kKindCount = 7;
 
-// Table order: bottom, zero, negative, zero-or-negative, one, positive,
-// zero-or-positive, top.
 inline constexpr unsigned kindIndex(Kind kind) {
     switch (kind) {
     case Kind::Bottom:
@@ -46,16 +39,14 @@ inline constexpr unsigned kindIndex(Kind kind) {
         return 2;
     case Kind::ZeroOrNeg:
         return 3;
-    case Kind::One:
-        return 4;
     case Kind::Positive:
-        return 5;
+        return 4;
     case Kind::ZeroOrPos:
-        return 6;
+        return 5;
     case Kind::Top:
-        return 7;
+        return 6;
     }
-    return 7;
+    return 6;
 }
 
 inline const char* name(Kind kind) {
@@ -68,8 +59,6 @@ inline const char* name(Kind kind) {
         return "negative";
     case Kind::ZeroOrNeg:
         return "zero-or-negative";
-    case Kind::One:
-        return "one";
     case Kind::Positive:
         return "positive";
     case Kind::ZeroOrPos:
@@ -97,21 +86,20 @@ struct SignState {
         constexpr Kind Ze = Kind::Zero;
         constexpr Kind Ne = Kind::Negative;
         constexpr Kind ZN = Kind::ZeroOrNeg;
-        constexpr Kind On = Kind::One;
+        // constexpr Kind On = Kind::One;
         constexpr Kind Po = Kind::Positive;
         constexpr Kind ZP = Kind::ZeroOrPos;
         constexpr Kind To = Kind::Top;
 
         static constexpr Kind joinTable[kKindCount][kKindCount] = {
-            //        Bo. Ze. Ne. ZN. On. Po. ZP. To
-            /* Bo */ {Bo, Ze, Ne, ZN, On, Po, ZP, To},
-            /* Ze */ {Ze, Ze, ZN, ZN, ZP, ZP, ZP, To},
-            /* Ne */ {Ne, ZN, Ne, ZN, To, To, To, To},
-            /* ZN */ {ZN, ZN, ZN, ZN, To, To, To, To},
-            /* On */ {On, ZP, To, To, On, Po, ZP, To},
-            /* Po */ {Po, ZP, To, To, Po, Po, ZP, To},
-            /* ZP */ {ZP, ZP, To, To, ZP, ZP, ZP, To},
-            /* To */ {To, To, To, To, To, To, To, To},
+            //        Bo  Ze  Ne  ZN  Po  ZP  To
+            /* Bo */ {Bo, Ze, Ne, ZN, Po, ZP, To},
+            /* Ze */ {Ze, Ze, ZN, ZN, ZP, ZP, To},
+            /* Ne */ {Ne, ZN, Ne, ZN, To, To, To},
+            /* ZN */ {ZN, ZN, ZN, ZN, To, To, To},
+            /* Po */ {Po, ZP, To, To, Po, ZP, To},
+            /* ZP */ {ZP, ZP, To, To, ZP, ZP, To},
+            /* To */ {To, To, To, To, To, To, To},
         };
 
         return joinTable[kindIndex(lhs.kind)][kindIndex(rhs.kind)];
