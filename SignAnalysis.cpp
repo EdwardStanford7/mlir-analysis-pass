@@ -127,7 +127,7 @@ LogicalResult SignAnalysis::visitOperation(Operation* op, ArrayRef<const SignLat
         return unknown();
     SignLattice* result = results[0];
 
-    // Constants seed the analysis with zero, one, negative, or positive.
+    // Constants seed the analysis with zero, negative, or positive.
     // This is the only rule that does not consult its operands, and without some
     // rule of this kind the analysis would have no facts to propagate at all.
     IntegerAttr value;

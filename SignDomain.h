@@ -25,7 +25,7 @@
 
 namespace sign {
 
-enum class Kind { Bottom, Zero, Negative, ZeroOrNeg, /* One,*/ Positive, ZeroOrPos, Top };
+enum class Kind { Bottom, Zero, Negative, ZeroOrNeg, Positive, ZeroOrPos, Top };
 
 inline constexpr unsigned kKindCount = 7;
 
@@ -86,7 +86,6 @@ struct SignState {
         constexpr Kind Ze = Kind::Zero;
         constexpr Kind Ne = Kind::Negative;
         constexpr Kind ZN = Kind::ZeroOrNeg;
-        // constexpr Kind On = Kind::One;
         constexpr Kind Po = Kind::Positive;
         constexpr Kind ZP = Kind::ZeroOrPos;
         constexpr Kind To = Kind::Top;

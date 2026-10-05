@@ -1,67 +1,47 @@
 # MLIR Sign Analysis
 
-An out-of-tree MLIR data-flow analysis that determines the sign of integer
-values. It builds as a plugin for `mlir-opt` and annotates values whose sign is
-known.
+An MLIR data-flow analysis that tracks whether integer values are zero,
+negative, positive, nonpositive, nonnegative, or unknown.
 
 ## Requirements
 
-- CMake 3.20 or newer
-- LLVM built with MLIR and loadable plugins enabled
-- `llvm-config`, `mlir-opt`, `mlir-translate`, and `clang` on `PATH`
+Install LLVM with MLIR support and put these tools on `PATH`:
 
-On macOS, Homebrew's LLVM package provides these tools. On Debian or Ubuntu,
-install the LLVM and MLIR development packages.
+- `clang`
+- `FileCheck`
+- `llvm-reduce`
+- `mlir-opt`
+- `mlir-translate`
 
-## Use
+CMake 3.20 or newer is also required. Homebrew's `llvm` package provides the
+LLVM and MLIR tools on macOS.
 
-Build the plugin:
-
-```sh
-make
-```
-
-The first build configures CMake automatically. Later builds are incremental
-and rebuild only the `SignAnalysis` plugin when its sources change.
-
-Run the analysis on the included SQLite source:
+## Commands
 
 ```sh
-make run
+make                 # configure once, then build the plugin incrementally
+make run             # analyze sqlite3.c and show useful non-constant facts
+make run-all         # include constants and uninformative comparison facts
+make clean           # remove compiled output but keep CMake configured
 ```
 
-To hide facts produced directly by MLIR constant operations:
-
-```sh
-make run-no-constants
-```
-
-To analyze another LLVM-dialect MLIR file:
+Use a different LLVM-dialect MLIR input with:
 
 ```sh
 make run INPUT=path/to/input.mlir
 ```
 
-Values at `top` or `bottom` are omitted because the analysis has no useful
-sign fact for them.
+The main implementation is in `SignDomain.h` and `SignAnalysis.cpp`.
 
-Remove compiled files while preserving the CMake configuration:
+## Reductions
+
+The `reductions` directory contains the three required `llvm-reduce`
+examples. Check their starting inputs or regenerate their reduced MLIR with:
 
 ```sh
-make clean
+make check-reductions
+make reduce-all
 ```
 
-## Source layout
-
-- `SignDomain.h` defines the lattice and join operation.
-- `SignAnalysis.cpp` defines transfer functions.
-- `SignAnalysis.h` connects the domain to MLIR's sparse data-flow framework.
-- `Plugin.cpp` registers the `sign-analysis` pass.
-- `Annotate.cpp` and `Annotate.h` print analysis results alongside the IR.
-
-The CMake files handle LLVM discovery and platform-specific plugin linking;
-normal development should only require the Makefile commands above.
-
-## License
-
-See [LICENSE](LICENSE).
+See [reductions/README.md](reductions/README.md) for what each reduction
+preserves.
