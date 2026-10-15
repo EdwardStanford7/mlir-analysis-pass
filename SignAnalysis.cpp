@@ -32,25 +32,28 @@ constexpr Kind Po = Kind::Positive;
 constexpr Kind ZP = Kind::ZeroOrPos;
 constexpr Kind To = Kind::Top;
 
+// These tables model fixed-width wrapping arithmetic without overflow flags.
+// Signs alone cannot bound magnitudes, so potentially wrapping cases need Top.
 constexpr TransferTable addTable = {
     //        Bo  Ze  Ne  ZN  Po  ZP  To
     /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
     /* Ze */ {Bo, Ze, Ne, ZN, Po, ZP, To},
-    /* Ne */ {Bo, Ne, Ne, Ne, To, To, To},
-    /* ZN */ {Bo, ZN, Ne, ZN, To, To, To},
-    /* Po */ {Bo, Po, To, To, Po, Po, To},
-    /* ZP */ {Bo, ZP, To, To, Po, ZP, To},
+    /* Ne */ {Bo, Ne, To, To, To, To, To},
+    /* ZN */ {Bo, ZN, To, To, To, To, To},
+    /* Po */ {Bo, Po, To, To, To, To, To},
+    /* ZP */ {Bo, ZP, To, To, To, To, To},
     /* To */ {Bo, To, To, To, To, To, To},
 };
 
 constexpr TransferTable subTable = {
     //        Bo  Ze  Ne  ZN  Po  ZP  To
     /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
-    /* Ze */ {Bo, Ze, Po, ZP, Ne, ZN, To},
-    /* Ne */ {Bo, Ne, To, To, Ne, Ne, To},
-    /* ZN */ {Bo, ZN, To, To, Ne, ZN, To},
-    /* Po */ {Bo, Po, Po, Po, To, To, To},
-    /* ZP */ {Bo, ZP, Po, ZP, To, To, To},
+    // Negating the minimum signed integer wraps back to a negative value.
+    /* Ze */ {Bo, Ze, To, To, Ne, ZN, To},
+    /* Ne */ {Bo, Ne, To, To, To, To, To},
+    /* ZN */ {Bo, ZN, To, To, To, To, To},
+    /* Po */ {Bo, Po, To, To, To, To, To},
+    /* ZP */ {Bo, ZP, To, To, To, To, To},
     /* To */ {Bo, To, To, To, To, To, To},
 };
 
@@ -58,10 +61,10 @@ constexpr TransferTable multTable = {
     //        Bo  Ze  Ne  ZN  Po  ZP  To
     /* Bo */ {Bo, Bo, Bo, Bo, Bo, Bo, Bo},
     /* Ze */ {Bo, Ze, Ze, Ze, Ze, Ze, Ze},
-    /* Ne */ {Bo, Ze, Po, ZP, Ne, ZN, To},
-    /* ZN */ {Bo, Ze, ZP, ZP, ZN, ZN, To},
-    /* Po */ {Bo, Ze, Ne, ZN, Po, ZP, To},
-    /* ZP */ {Bo, Ze, ZN, ZN, ZP, ZP, To},
+    /* Ne */ {Bo, Ze, To, To, To, To, To},
+    /* ZN */ {Bo, Ze, To, To, To, To, To},
+    /* Po */ {Bo, Ze, To, To, To, To, To},
+    /* ZP */ {Bo, Ze, To, To, To, To, To},
     /* To */ {Bo, Ze, To, To, To, To, To},
 };
 
