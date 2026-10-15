@@ -36,6 +36,3 @@ clang instrumented.ll -o instrumented
 ```
 
 Instrumentation is opt-in; plain `./run.sh example.mlir` prints annotations.
-Checks currently skip `i1` values and global initializers. Boundary tests use
-defined LLVM wrapping arithmetic and may expose incorrect sign predictions.
-SQLite's `sqlite3.c` is a library: it needs a driver with `main` to run.
