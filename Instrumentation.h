@@ -7,7 +7,8 @@
 
 namespace sign {
 
-// Insert a sign check after the value becomes available, trapping on failure.
+// Insert a sign check after the value becomes available, reporting and trapping
+// on failure (diagnostics use libc's dprintf).
 // Currently skips i1 values, Top/Bottom, and values outside LLVM functions.
 void insert_assertion(Kind kind, mlir::Value value);
 

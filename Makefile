@@ -3,6 +3,9 @@ PLUGIN ?= SignAnalysis
 INPUT ?= input.mlir
 REDUCTIONS_DIR ?= reductions
 CONFIG_STAMP := $(BUILD_DIR)/.configured
+TEST ?= *
+TEST_OUTPUT_DIR ?= $(BUILD_DIR)/instrumentation-tests
+TEST_TIMEOUT ?= 5
 
 all: build
 
@@ -14,6 +17,13 @@ run: build $(INPUT)
 # Show every fact emitted by the analysis, including constants.
 run-all: build $(INPUT)
 	./run.sh $(INPUT) | grep -E 'is (zero|negative|positive)'
+
+# Keep generated IR, annotations, executables, and logs for debugging.
+test:
+	@build_log=$$(mktemp); \
+	trap 'rm -f "$$build_log"' EXIT; \
+	$(MAKE) --no-print-directory build > "$$build_log" 2>&1 || { cat "$$build_log"; exit 1; }
+	@python3 tests/run.py --build-dir "$(BUILD_DIR)" --output-dir "$(TEST_OUTPUT_DIR)" --case '$(TEST)' --timeout "$(TEST_TIMEOUT)"
 
 check-reductions: build
 	@for id in 1 2 3; do \
@@ -47,4 +57,4 @@ clean:
 		cmake --build $(BUILD_DIR) --target clean; \
 	fi
 
-.PHONY: all build check-reductions clean reduce1 reduce2 reduce3 reduce-all run run-all
+.PHONY: all build check-reductions clean reduce1 reduce2 reduce3 reduce-all run run-all test
