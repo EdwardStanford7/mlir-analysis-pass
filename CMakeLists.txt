@@ -102,6 +102,7 @@ add_definitions(${LLVM_DEFINITIONS})
 add_llvm_library(SignAnalysis MODULE PARTIAL_SOURCES_INTENDED
   SignAnalysis.cpp
   Annotate.cpp
+  Instrumentation.cpp
   Plugin.cpp
   PLUGIN_TOOL mlir-opt
 )

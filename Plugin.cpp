@@ -5,8 +5,10 @@
 //===----------------------------------------------------------------------===//
 
 #include "Annotate.h"
+#include "Instrumentation.h"
 #include "SignAnalysis.h"
 
+#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Analysis/DataFlow/ConstantPropagationAnalysis.h"
 #include "mlir/Analysis/DataFlow/DeadCodeAnalysis.h"
 #include "mlir/IR/AsmState.h"
@@ -15,8 +17,11 @@
 #include "mlir/Pass/PassRegistry.h"
 #include "mlir/Tools/Plugins/PassPlugin.h"
 #include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/raw_ostream.h"
+
+#include <utility>
 
 using namespace mlir;
 
@@ -24,6 +29,11 @@ namespace {
 
 struct SignAnalysisPass : PassWrapper<SignAnalysisPass, OperationPass<ModuleOp>> {
     MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(SignAnalysisPass)
+
+    SignAnalysisPass() = default;
+    SignAnalysisPass(const SignAnalysisPass& other) : PassWrapper(other) {}
+
+    Option<bool> instrument{*this, "instrument", llvm::cl::desc("Insert runtime checks for inferred integer signs"), llvm::cl::init(false)};
 
     StringRef getArgument() const final { return "sign-analysis"; }
 
@@ -46,6 +56,31 @@ struct SignAnalysisPass : PassWrapper<SignAnalysisPass, OperationPass<ModuleOp>>
             return signalPassFailure();
         }
 
+        // Save the original facts before instrumentation changes the control flow.
+        llvm::SmallVector<std::pair<Value, sign::Kind>> checks;
+        auto collect = [&](Value value) {
+            auto type = llvm::dyn_cast<IntegerType>(value.getType());
+            if (!type || type.getWidth() == 1)
+                return;
+            const auto* lattice = solver.lookupState<sign::SignLattice>(value);
+            if (!lattice)
+                return;
+            sign::Kind kind = lattice->getValue().kind;
+            if (kind != sign::Kind::Top && kind != sign::Kind::Bottom)
+                checks.emplace_back(value, kind);
+        };
+        if (instrument) {
+            getOperation().walk([&](LLVM::LLVMFuncOp function) {
+                for (Block& block : function.getBody()) {
+                    for (BlockArgument argument : block.getArguments())
+                        collect(argument);
+                    for (Operation& op : block)
+                        for (Value result : op.getResults())
+                            collect(result);
+                }
+            });
+        }
+
         // Query states only now that the solver has converged.
         auto describe = [&](Value value, AsmState& asmState) -> std::string {
             const auto* lattice = solver.lookupState<sign::SignLattice>(value);
@@ -59,15 +94,19 @@ struct SignAnalysisPass : PassWrapper<SignAnalysisPass, OperationPass<ModuleOp>>
             llvm::raw_string_ostream os(description);
             value.printAsOperand(os, asmState);
             os << " is " << sign::name(kind);
+
             return description;
         };
 
-        // stderr, so that mlir-opt's stdout stays the unmodified IR and the two can
-        // be redirected independently.
+        // Print original annotations to stderr; mlir-opt prints the resulting
+        // module to stdout after this pass returns.
         sign::printAnnotated(getOperation(), describe, llvm::errs());
 
-        // This pass only reads.
-        markAllAnalysesPreserved();
+        for (const auto& [value, kind] : checks)
+            sign::insert_assertion(kind, value);
+
+        if (!instrument)
+            markAllAnalysesPreserved();
     }
 };
 
