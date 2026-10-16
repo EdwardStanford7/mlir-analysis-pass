@@ -2,8 +2,8 @@
 #include "Instrumentation.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
-#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "llvm/ADT/SmallVector.h"
 
 namespace sign {
@@ -12,13 +12,11 @@ namespace {
 
 // Print directly to stderr before trapping, so redirected output is not lost
 // in a stdio buffer. dprintf is supplied by libc on macOS and Linux.
-void printFailure(mlir::OpBuilder& builder, mlir::Value value,
-                  llvm::StringRef description) {
+void printFailure(mlir::OpBuilder& builder, mlir::Value value, llvm::StringRef description) {
     auto location = value.getLoc();
     auto module = value.getParentBlock()->getParentOp()->getParentOfType<mlir::ModuleOp>();
     auto pointer = mlir::LLVM::LLVMPointerType::get(builder.getContext());
-    auto functionType = mlir::LLVM::LLVMFunctionType::get(
-        builder.getI32Type(), {builder.getI32Type(), pointer}, true);
+    auto functionType = mlir::LLVM::LLVMFunctionType::get(builder.getI32Type(), {builder.getI32Type(), pointer}, true);
     auto printer = module.lookupSymbol<mlir::LLVM::LLVMFuncOp>("dprintf");
     if (!printer) {
         mlir::OpBuilder::InsertionGuard guard(builder);
@@ -37,8 +35,7 @@ void printFailure(mlir::OpBuilder& builder, mlir::Value value,
     unsigned width = llvm::cast<mlir::IntegerType>(value.getType()).getWidth();
     if (width <= 64) {
         format += "  actual: %lld\n";
-        actual.push_back(width == 64 ? value :
-            mlir::LLVM::SExtOp::create(builder, location, builder.getI64Type(), value).getResult());
+        actual.push_back(width == 64 ? value : mlir::LLVM::SExtOp::create(builder, location, builder.getI64Type(), value).getResult());
     } else {
         // Preserve every bit of wider integers, displaying them in hexadecimal.
         format += "  actual (hex): 0x";
@@ -46,8 +43,7 @@ void printFailure(mlir::OpBuilder& builder, mlir::Value value,
             unsigned shift = (chunk - 1) * 64;
             mlir::Value bits = value;
             if (shift) {
-                auto amount = mlir::LLVM::ConstantOp::create(builder, location,
-                    value.getType(), builder.getIntegerAttr(value.getType(), shift));
+                auto amount = mlir::LLVM::ConstantOp::create(builder, location, value.getType(), builder.getIntegerAttr(value.getType(), shift));
                 bits = mlir::LLVM::LShrOp::create(builder, location, value, amount.getResult()).getResult();
             }
             actual.push_back(mlir::LLVM::TruncOp::create(builder, location, builder.getI64Type(), bits).getResult());
@@ -61,10 +57,8 @@ void printFailure(mlir::OpBuilder& builder, mlir::Value value,
     do {
         symbol = "__sign_failure_message_" + std::to_string(index++);
     } while (module.lookupSymbol(symbol));
-    auto message = mlir::LLVM::createGlobalString(location, builder, symbol,
-        format, mlir::LLVM::Linkage::Private);
-    auto stderrFd = mlir::LLVM::ConstantOp::create(builder, location,
-        builder.getI32Type(), builder.getI32IntegerAttr(2));
+    auto message = mlir::LLVM::createGlobalString(location, builder, symbol, format, mlir::LLVM::Linkage::Private);
+    auto stderrFd = mlir::LLVM::ConstantOp::create(builder, location, builder.getI32Type(), builder.getI32IntegerAttr(2));
     llvm::SmallVector<mlir::Value> arguments{stderrFd.getResult(), message};
     arguments.append(actual);
     mlir::LLVM::CallOp::create(builder, location, printer, arguments);
@@ -77,8 +71,7 @@ void insert_assertion(Kind kind, mlir::Value value) {
     // in LLVM function bodies, never global initializer regions.
     auto type = llvm::dyn_cast<mlir::IntegerType>(value.getType());
     mlir::Block* block = value.getParentBlock();
-    if (!type || type.getWidth() == 1 || !block ||
-        !llvm::isa<mlir::LLVM::LLVMFuncOp>(block->getParentOp()))
+    if (!type || type.getWidth() == 1 || !block || !llvm::isa<mlir::LLVM::LLVMFuncOp>(block->getParentOp()))
         return;
     if (kind == Kind::Top || kind == Kind::Bottom)
         return;

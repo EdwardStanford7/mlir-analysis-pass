@@ -1,4 +1,3 @@
-// Defined wrapping subtraction, with safe and boundary paths.
 module {
   llvm.func @main(%argc: i32, %argv: !llvm.ptr) -> i32 {
     %zero = llvm.mlir.constant(0 : i32) : i32

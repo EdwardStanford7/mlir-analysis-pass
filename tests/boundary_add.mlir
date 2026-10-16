@@ -1,5 +1,3 @@
-// No overflow flags: fixed-width LLVM addition wraps with defined behavior.
-// No arguments selects a small operand; extra arguments select the boundary.
 module {
   llvm.func @main(%argc: i32, %argv: !llvm.ptr) -> i32 {
     %zero = llvm.mlir.constant(0 : i32) : i32

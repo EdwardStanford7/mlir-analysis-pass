@@ -1,5 +1,3 @@
-// Different argument counts select zero, negative, or positive at a join.
-// The first join produces ZeroOrNeg; the second produces ZeroOrPos.
 module {
   llvm.func @main(%argc: i32, %argv: !llvm.ptr) -> i32 {
     %zero = llvm.mlir.constant(0 : i32) : i32

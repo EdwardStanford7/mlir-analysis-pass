@@ -1,4 +1,3 @@
-// Loop-carried block arguments exercise fixed-point propagation and repeated checks.
 module {
   llvm.func @main(%argc: i32, %argv: !llvm.ptr) -> i32 {
     %zero = llvm.mlir.constant(0 : i32) : i32
